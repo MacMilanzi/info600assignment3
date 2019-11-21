@@ -1,28 +1,95 @@
-document.addEventListener('DOMContentLoaded', assignClickHandler)
+$(document).ready(function(){
+  // create the event handler of the "Load button" when clicked
+  $('#loadRec').click(function(){
+    // create date and time object
+    var myDate = new Date();
+    // create the ajax request
+    $.getJSON("/users", function(data){
+      //extract each key with its value
+      $(data.records).each(function(key, value){
+          $("ul").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button id="DeleteRec">Delete</button>'+'</li>' );
 
-function assignClickHandler () {
-  document.getElementById('addRec').addEventListener('click', function () {
-    const startYear = document.getElementById('startYear').value
-    if (startYear < 2000) {
-      window.alert('Incorrect year: ' + startYear)
+      });
+
+    });
+  });
+});// end the load data function
+
+// Add Record button function
+$(document).ready(function(){
+  $("#addRec").click(function(){
+
+    // variable for testing of the year record
+    var startYear = $("#startYear").val();
+    var startYearInt = parseInt(startYear);
+
+    //Condition for the year
+    if(startYearInt < 2000) {
+      window.alert('Incorrect year: ' + startYear);
       return
     }
-    const fullName = document.getElementById('fullName').value
-    const major = document.getElementById('major').value
+    // the record to be added to the json file is in this formart
+    var record ={
+      fullName: $("#fullName").val(),
+      major: $("#major").val(),
+      startYear: $("#startYear").val(),
+    }; 
 
-    const date = new Date()
-    const hours = date.getHours().toString().padStart(2, '0')
-    const minutes = date.getMinutes().toString().padStart(2, '0')
-    const time = hours + ':' + minutes
+    $.ajax({
+      method: 'POST',
+      url: '/users/',
+      data: record,
+      success: function(newRecord){
+        $(data.newRecord).append("<li> id: "+newRecord.id +", fullName :"+newRecord.fullName+ ","+ "major: "+ newRecord.major+ ", startYear: "+newRecord.startYear+"</li>");
+      }
 
-    const newEntry = time + ' - ' + fullName + ', ' + major + ', ' + startYear
+    });
+    // clear the data after adding the record
+    document.getElementById('inputs').reset();
+  });// end the addRec button click function
+});// end the add record button function
 
-    const enteredRecords = document.getElementById('enteredRecords')
-    let newChild = document.createElement('li')
-    newChild.appendChild(document.createTextNode(newEntry))
+$(document).on("click","#DeleteRec",function(){
+  $.getJSON("/users", function(data){
+    //extract each key with its value
+    $(data.records).each(function(key, value){
+     const id = value.id;
+        $.ajax({
 
-    enteredRecords.appendChild(newChild)
+          method: 'DELETE',
+          url: '/user/'+id,
+          dataType: 'json',
+          success:  function(){
+            alert("Delete Successful"+id);
+          }, // end the success function
+          error: function(){
+            alert("Delete Unsuccessful");
+          } // end the error function
 
-    document.getElementById('inputs').reset()
-  })
-}
+        }); // the ajax DELETE request
+  
+    });// END THE each Function 
+    reload(); // call the reload method
+  }); // end the getJSON function
+
+  }); // end the document
+
+
+function reload(){
+  var myDate = new Date();
+  $.getJSON("/users", function(data){
+      //extract each key with its value
+      $(data.records).each(function(key, value){
+          $("ul").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button id="DeleteRec">Delete</button>'+'</li>' );
+
+      }); //end the each function
+
+    }); // end the getJSON function
+    
+  }// end reload function
+
+
+
+
+
+
