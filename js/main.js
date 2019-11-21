@@ -1,13 +1,15 @@
 $(document).ready(function(){
   // create the event handler of the "Load button" when clicked
+
   $('#loadRec').click(function(){
+    $('#View').empty();
     // create date and time object
     var myDate = new Date();
     // create the ajax request
     $.getJSON("/users", function(data){
       //extract each key with its value
       $(data.records).each(function(key, value){
-          $("ul").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button id="DeleteRec">Delete</button>'+'</li>' );
+          $("#View").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button value='+value.id+' id="DeleteRec">Delete</button>'+'</li>' );
 
       });
 
@@ -37,7 +39,7 @@ $(document).ready(function(){
 
     $.ajax({
       method: 'POST',
-      url: '/users/',
+      url: '/user/',
       data: record,
       success: function(newRecord){
         $(data.newRecord).append("<li> id: "+newRecord.id +", fullName :"+newRecord.fullName+ ","+ "major: "+ newRecord.major+ ", startYear: "+newRecord.startYear+"</li>");
@@ -50,37 +52,25 @@ $(document).ready(function(){
 });// end the add record button function
 
 $(document).on("click","#DeleteRec",function(){
-  $.getJSON("/users", function(data){
-    //extract each key with its value
-    $(data.records).each(function(key, value){
-     const id = value.id;
+  const id= $(this).val();  
+    console.log(id);
         $.ajax({
 
           method: 'DELETE',
           url: '/user/'+id,
-          dataType: 'json',
-          success:  function(){
-            alert("Delete Successful"+id);
-          }, // end the success function
-          error: function(){
-            alert("Delete Unsuccessful");
-          } // end the error function
-
-        }); // the ajax DELETE request
+          
+        }) // the ajax DELETE request
+        .done(reload) // call the reload method
   
-    });// END THE each Function 
-    reload(); // call the reload method
-  }); // end the getJSON function
-
-  }); // end the document
-
+    });// END THE end the document 
 
 function reload(){
   var myDate = new Date();
+  $('#View').empty();
   $.getJSON("/users", function(data){
       //extract each key with its value
       $(data.records).each(function(key, value){
-          $("ul").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button id="DeleteRec">Delete</button>'+'</li>' );
+          $("#View").append('<li>'+myDate.getHours() +':'+ myDate.getMinutes() +'-' +value.fullName+ ','+ value.major + ', ' + value.startYear+'<button value='+value.id+' id="DeleteRec">Delete</button>'+'</li>' );
 
       }); //end the each function
 
